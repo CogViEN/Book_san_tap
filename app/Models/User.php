@@ -9,5 +9,18 @@ class User extends Model
 {
     use HasFactory;
 
-    public $timestamp = false;
+    public $timestamps = false;
+
+    protected $fillable = [
+        'name',
+        'phone',
+        'email',
+        'password',
+        'avatar',
+    ];
+
+    public function getInformationAttribute()
+    {
+        return '#' . $this->id . ' - ' . $this->name;
+    }
 }
