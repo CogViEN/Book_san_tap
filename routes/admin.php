@@ -14,6 +14,9 @@ Route::group([
 ], function () {
     Route::get('/', [UserController::class, 'index'])->name('index');
     Route::get('/api', [UserController::class, 'api'])->name('api');
-    Route::get('/edit{user}', [UserController::class, 'edit'])->name('edit');
-    Route::delete('course/{user}', [UserController::class, 'destroy'])->name('destroy');
+    Route::get('/api/name', [UserController::class, 'apiName'])->name('api.name');
+    Route::get('/create', [UserController::class, 'create'])->name('create');
+    Route::post('/store', [UserController::class, 'store'])->name('store');
+    Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
+    Route::delete('destroy/{user}', [UserController::class, 'destroy'])->name('destroy');
 });

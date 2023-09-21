@@ -46,6 +46,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="{{ asset('js/vendor.min.js') }}"></script>
     <script src="{{ asset('js/app.min.js') }}"></script>
+    <script src="{{ asset('js/helper.js') }}"></script>
     {{-- stack không chạy ở đây nó sẽ chờ lượt --}}
     @stack('js')
 
