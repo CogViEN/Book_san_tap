@@ -10,6 +10,7 @@ use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Controllers\Trait\TitleTrait;
 use App\Http\Controllers\Trait\ResponseTrait;
@@ -92,10 +93,11 @@ class UserController extends Controller
                 $image_name = $image->getClientOriginalName();
                 $path = $request->file('avatar')->storeAs($destination_path, $image_name);
 
-                $arr['avatar'] = $request->phone . '/' . $image_name;
+                $arr['avatar'] =  'http://book_san_tap.test/storage/images/user_avatar/' . $request->phone . '/' . $image_name;
             }
 
-            User::create($arr);
+            $user = User::create($arr);
+
             return $this->successResponse();
         } catch (Throwable $e) {
             $message = '';
@@ -106,8 +108,23 @@ class UserController extends Controller
         }
     }
 
-    public function destroy($courseId)
+    public function destroy($userId)
     {
-        $this->model->find($courseId)->delete();
+        $userPhone = User::find($userId)->phone;
+
+        $this->model->find($userId)->delete();
+        Storage::deleteDirectory(public_path('images/user_avatar' . $userPhone));
+    }
+
+    public function getOwner(Request $request)
+    {
+        $data = $this->model
+            ->where([
+                ['name', 'like', '%' . $request->get('q') . '%'],
+                ['role', 2],
+            ],)
+            ->get();
+
+        return $this->successResponse($data);
     }
 }
