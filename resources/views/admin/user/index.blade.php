@@ -135,7 +135,7 @@
                         searchable: false,
                         "data": "avatar",
                         "render": function(data) {
-                            return '<img src="http://book_san_tap.test/storage/images/user_avatar/' + data + '"" height="50px">';
+                            return '<img src="' + data + '"" height="50px">';
                         }
                     },
                     // {

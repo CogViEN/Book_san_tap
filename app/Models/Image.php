@@ -5,16 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PitchArea extends Model
+class Image extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'name',
-        'address',
-        'province', 
-        'district',
-        'description',
+        'object_id',
+        'path',
+        'type',
     ];
 }
