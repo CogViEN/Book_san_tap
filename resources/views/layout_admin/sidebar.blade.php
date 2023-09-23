@@ -31,10 +31,10 @@
                                         <span class="badge badge-success float-right">4</span>
                                         <span> Users </span>
                                     </a>
-                                    <a href="javascript: void(0);" class="side-nav-link">
+                                    <a href="{{ route('admin.pitchareas.index') }}" class="side-nav-link">
                                         <i class="uil-home-alt"></i>
                                         <span class="badge badge-success float-right">4</span>
-                                        <span> PitchAreas </span>
+                                        <span> Pitch Areas </span>
                                     </a>
                                     <a href="javascript: void(0);" class="side-nav-link">
                                         <i class="uil-home-alt"></i>
