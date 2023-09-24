@@ -9,8 +9,10 @@ class Image extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
-        'object_id',
+        'object-id',
         'path',
         'type',
     ];

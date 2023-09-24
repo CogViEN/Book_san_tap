@@ -48,7 +48,7 @@
                 </div>
                 <div class="form-group col-8">
                     <label for="name">Pitch Area Name</label>
-                    <input type="text" id="name" class="form-control" name="name">
+                    <input type="text" id="name-pitch-area" class="form-control" name="name">
                 </div>
                 <div class="form-group col-8">
                     <label for="address">Address</label>
@@ -73,7 +73,7 @@
                     <input type="file" id="files" name="images[]" multiple />
                 </div>
                 <div class="form-group col-8">
-                    <button id="btn-submit" onclick="submitForm()" type="button"
+                    <button id="btn-submit" onclick="checkOwnerExists()" type="button"
                         class="btn btn-outline-success btn-rounded">
                         <i class="uil-cloud-computing"></i>
                         Create
@@ -82,6 +82,36 @@
             </form>
         </div>
     </div>
+    {{-- Create Owner --}}
+    <div id="modal-owner" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="standard-modalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="standard-modalLabel">Create Owner</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('admin.users.store.owner') }}" method="post" id="form-create-owner">
+                        @csrf
+                        <div class="form-group position-relative mb-3">
+                            <label for="validationTooltip01">Name</label>
+                            <input type="text" name="name" class="form-control" id="name-owner" placeholder="Name"
+                                required>
+                        </div>
+                        <div class="form-group position-relative mb-3">
+                            <label for="validationTooltip02">Phone</label>
+                            <input type="number" class="form-control" name="phone" id="phone" placeholder="Phone"
+                                required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="submitForm('owner')" class="btn btn-primary" type="button">Submit</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
     </div>
 @endsection
 @push('js')
@@ -170,7 +200,8 @@
                             })
                         };
                     },
-                }
+                },
+                tags: true,
             });
         }
 
@@ -196,10 +227,12 @@
         }
 
 
-        function submitForm() {
-            const obj = $("#form-create-pitcharea");
+        function submitForm(type) {
+            const obj = $("#form-create-" + type);
             var formData = new FormData(obj[0]);
-            formData.append('imageRemove', arrImgRemove);
+            if (type == "pitcharea") {
+                formData.append('imageRemove', arrImgRemove);
+            }
             $.ajax({
                 url: obj.attr('action'),
                 type: 'POST',
@@ -211,9 +244,27 @@
                 contentType: false,
                 enctype: 'multipart/form-data',
                 success: function(response) {
+                    if (response.success) {
+                        $("#modal-owner").modal("hide");
+                        if (type == 'owner') {
+                            notifySuccess('create owner successfully');
+                        } else {
+                            notifySuccess('');
+                        }
+                    } else {
+                        showError(response.message);
+                    }
 
                 },
                 error: function(response) {
+                    let errors;
+                    if (response.responseJSON.errors) {
+                        errors = Object.values(response.responseJSON.errors);
+                        showError(errors);
+                    } else {
+                        errors = response.responseJSON.message;
+                        showError(errors);
+                    }
 
                 },
             });
@@ -258,6 +309,25 @@
             }
         }
 
+        function checkOwnerExists() {
+            if (validateForm() == false) {
+                return;
+            }
+            $.ajax({
+                type: "get",
+                url: ' {{ route('admin.users.check') }}/' + $("#select-owner").val(),
+                dataType: "json",
+                success: function(response) {
+                    if (response.data) {
+                        submitForm('pitcharea');
+                    } else {
+                        $("#modal-owner").modal("show");
+                        $("#name-owner").val($("#select-owner").val());
+                    }
+                }
+            });
+        }
+
         function showError(errors) {
             let string = '<ul>'
             if (Array.isArray(errors)) {
@@ -273,6 +343,16 @@
             $("#div_errors").html(string);
             $("#div_errors").removeClass("d-none").show();
             notifyError(string);
+        }
+
+        function validateForm() {
+            if ($('#select-owner').find(":selected").val() === undefined ||
+                !$('#name-pitch-area').val() || $('#select-city').find(":selected").val() == 'Select City') {
+
+                showError('Please fill owner, pitch area name and city');
+                return false;
+            }
+            return true;
         }
     </script>
 @endpush

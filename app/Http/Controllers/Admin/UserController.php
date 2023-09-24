@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Controllers\Trait\TitleTrait;
 use App\Http\Controllers\Trait\ResponseTrait;
+use App\Http\Requests\User\StoreOwnerRequest;
 
 class UserController extends Controller
 {
@@ -93,7 +94,8 @@ class UserController extends Controller
                 $image_name = $image->getClientOriginalName();
                 $path = $request->file('avatar')->storeAs($destination_path, $image_name);
 
-                $arr['avatar'] =  'http://book_san_tap.test/storage/images/user_avatar/' . $request->phone . '/' . $image_name;
+                $getHost = request()->getHost();
+                $arr['avatar'] =  $getHost . '/storage/images/user_avatar/' . $request->phone . '/' . $image_name;
             }
 
             $user = User::create($arr);
@@ -126,5 +128,25 @@ class UserController extends Controller
             ->get();
 
         return $this->successResponse($data);
+    }
+
+    public function checkOwner($ownerName)
+    {
+        $check = $this->model
+            ->where([
+                ['name', '=', $ownerName],
+                ['role', '=', UserRoleEnum::OWNER],
+            ])
+            ->exists();
+        return $this->successResponse($check);
+    }
+
+    public function storeOwner(StoreOwnerRequest $request){
+        $arr = $request->validated();
+        $arr['password'] = '1'; // default when creating by admin or super admin
+        $arr['role'] = UserRoleEnum::OWNER;
+        User::create($arr);
+
+        return $this->successResponse();
     }
 }

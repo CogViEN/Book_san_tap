@@ -18,8 +18,10 @@ Route::group([
     Route::get('/api/name', [UserController::class, 'apiName'])->name('api.name');
     Route::get('/api/owners', [UserController::class, 'getOwner'])->name('api.owners');
     Route::get('/create', [UserController::class, 'create'])->name('create');
+    Route::post('/store/owner', [UserController::class, 'storeOwner'])->name('store.owner');
     Route::post('/store', [UserController::class, 'store'])->name('store');
     Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
+    Route::get('/check/{user?}', [UserController::class, 'checkOwner'])->name('check');
     Route::delete('destroy/{user}', [UserController::class, 'destroy'])->name('destroy');
 });
 
