@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\PitchAreaController;
+use App\Http\Controllers\Admin\PitchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 
@@ -32,6 +33,13 @@ Route::group([
     Route::get('/', [PitchAreaController::class, 'index'])->name('index');
     Route::get('/create', [PitchAreaController::class, 'create'])->name('create');
     Route::post('/store', [PitchAreaController::class, 'store'])->name('store');
-   
+    Route::get('/show/pitch/{pitcharea}', [PitchAreaController::class, 'showPitch'])->name('show.pitch');
+    Route::post('/import-csv/{pitcharea}', [PitchAreaController::class, 'importCSV'])->name('import_csv');
 });
 
+Route::group([
+    'as' => 'pitches.',
+    'prefix' => 'pitches',
+], function () {
+    Route::get('/{pitcharea}', [PitchController::class, 'index'])->name('index');
+});

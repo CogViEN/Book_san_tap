@@ -141,12 +141,21 @@ class UserController extends Controller
         return $this->successResponse($check);
     }
 
-    public function storeOwner(StoreOwnerRequest $request){
-        $arr = $request->validated();
-        $arr['password'] = '1'; // default when creating by admin or super admin
-        $arr['role'] = UserRoleEnum::OWNER;
-        User::create($arr);
+    public function storeOwner(StoreOwnerRequest $request)
+    {
+        try {
+            $arr = $request->validated();
+            $arr['password'] = '1'; // default when creating by admin or super admin
+            $arr['role'] = UserRoleEnum::OWNER;
+            User::create($arr);
 
-        return $this->successResponse();
+            return $this->successResponse();
+        } catch (Throwable $e) {
+            $message = '';
+            if ($e->getCode() === '23000') {
+                $message = 'Duplicate phone or email';
+            }
+            return $this->errorResponse($message);
+        }
     }
 }

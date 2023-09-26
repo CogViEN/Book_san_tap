@@ -21,8 +21,8 @@ class User extends Model
         'role',
     ];
 
-    public function getInformationAttribute()
+    public function getInfoAttribute()
     {
-        return '#' . $this->id . ' - ' . $this->name;
+        return $this->name . ' - ' . $this->phone;
     }
 }
