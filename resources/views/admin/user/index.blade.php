@@ -135,7 +135,7 @@
                         searchable: false,
                         "data": "avatar",
                         "render": function(data) {
-                            return '<img src="' + data + '"" height="50px">';
+                            return '<img src="http://' + data + '"" height="50px">';
                         }
                     },
                     // {

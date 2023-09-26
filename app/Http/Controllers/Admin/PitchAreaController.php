@@ -6,10 +6,13 @@ use Throwable;
 use App\Models\User;
 use App\Models\Image;
 use App\Models\PitchArea;
+use App\Imports\PitchImport;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Trait\TitleTrait;
 use App\Http\Controllers\Trait\ResponseTrait;
@@ -28,13 +31,27 @@ class PitchAreaController extends Controller
         $this->table = (new PitchArea())->getTable();
 
         $routerName = Route::currentRouteName();
+        $title = ucfirst($this->getTitleRoute($routerName));
 
-        View::share('title', ucfirst($this->getTitleRoute($routerName)));
+        View::share('title', $title);
     }
 
     public function index()
     {
-        return view('admin.pitch_area.index');
+        $arrPitchArea = $this->model->get();
+        $arrImage = [];
+        $arrOwner = [];
+
+        for ($i = 0; $i < count($arrPitchArea); $i++) {
+            $arrImage[$i] = Image::where('object-id', $arrPitchArea[$i]->id)->first()->path;
+            $arrOwner[$i] = User::where('id', $arrPitchArea[$i]->user_id)->first()->info;
+        }
+
+        return view('admin.pitch_area.index', [
+            'arrPitchArea' => $arrPitchArea,
+            'arrImage' => $arrImage,
+            'arrOwner' => $arrOwner,
+        ]);
     }
 
     public function create()
@@ -79,7 +96,7 @@ class PitchAreaController extends Controller
                             $path = $image->storeAs($destination_path, $image_name);
                             Image::create([
                                 'object-id' => $pitchArea->id,
-                                'path' => $getHost . '/storage/images/pitch/' . $path,
+                                'path' => $getHost . '/storage/images/pitch/' . $request->name . '/' . $image_name,
                                 'type' => 1,
                             ]);
                         }
@@ -89,7 +106,7 @@ class PitchAreaController extends Controller
                         $path = $image->storeAs($destination_path, $image_name);
                         Image::create([
                             'object-id' => $pitchArea->id,
-                            'path' => $getHost . '/storage/images/pitch/' . $path,
+                            'path' => $getHost . '/storage/images/pitch/' . $request->name . '/' . $image_name,
                             'type' => 1,
                         ]);
                     }
@@ -101,6 +118,33 @@ class PitchAreaController extends Controller
         } catch (Throwable $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function showPitch($pitchAreaId)
+    {
+        $pitchArea = PitchArea::where('id', $pitchAreaId)
+            ->value('name');
+
+        if ($pitchArea == null) {
+            return redirect()->route('admin.pitchareas.index');
+        }
+
+        $title = 'Pitchareas - ' . $pitchArea;
+
+        return view('admin.pitch.show', [
+            'title' => $title,
+            'pitchAreaId' => $pitchAreaId,
+        ]);
+    }
+
+    public function importCSV(Request $request, $pitchAreaId): JsonResponse
+    {
+        try {
+            Excel::import(new PitchImport($pitchAreaId), $request->file('file'));
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->errorResponse();
         }
     }
 }
