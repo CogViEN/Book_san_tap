@@ -42,4 +42,6 @@ Route::group([
     'prefix' => 'pitches',
 ], function () {
     Route::get('/{pitcharea}', [PitchController::class, 'index'])->name('index');
+    Route::get('/create/{pitcharea}', [PitchController::class, 'create'])->name('create');
+    Route::get('/edit/price/{pitcharea}', [PitchController::class, 'editPrice'])->name('edit.price');
 });

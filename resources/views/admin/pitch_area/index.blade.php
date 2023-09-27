@@ -17,6 +17,9 @@
     @for ($i = 0; $i < count($arrPitchArea); $i++)
         <x-pitch-area :pitchArea="$arrPitchArea[$i]" :image="$arrImage[$i]" :owner="$arrOwner[$i]"/>
     @endfor
+    <ul class="pagination pagination-info" style="float: right">
+        {{ $arrPitchArea->appends(request()->all())->links() }}
+    </ul>
 @endsection
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

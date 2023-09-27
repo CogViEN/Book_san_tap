@@ -2,15 +2,36 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <a href="#" class="btn btn-primary">
+            <a href="{{ route('admin.pitches.create', $pitchAreaId) }}" class="btn btn-primary">
                 Create
             </a>
             <label for="csv" class="btn btn-success mb-0">
                 Import CSV
             </label><input type="file" name="csv" id="csv" class="d-none"
                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+            <a href="{{ route('admin.pitches.edit.price', $pitchAreaId) }}" class="btn btn-warning" style="float: right">Edit Price</a>
         </div>
         <div class="card-body">
+            <div class="row mb-2">
+                <div class="col">
+                    <label>Type</label>
+                    <select class="form-control select-type" name="type" id="select-type">
+                        <option value="-1">Select All</option>
+                        @foreach ($arrType as $key => $type)
+                            <option value="{{ $type }}">{{ $key }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col">
+                    <label>Status</label>
+                    <select class="form-control select-status" name="status" id="select-status">
+                        <option value="-1">Select All</option>
+                        @foreach ($arrStatus as $key => $status)
+                            <option value="{{ $status }}">{{ $key }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-centered table-dark table-hover mb-0" id="table-index">
                     <thead>
@@ -27,30 +48,13 @@
                 </table>
             </div>
         </div>
+
     </div>
 @endsection
 @push('js')
     <script>
         $(document).ready(function() {
-            $.ajax({
-                type: "get",
-                url: '{{ route('admin.pitches.index', $pitchAreaId) }}',
-                dataType: "json",
-                success: function(response) {
-                    for (var i = 0; i < response.data.length; i++) {
-                        $('#table-index').append($('<tr>')
-                            .append($('<td>').append(response.data[i].name))
-                            .append($('<td>').append(response.data[i].type))
-                            .append($('<td>').append('<span class="badge badge-success-lighten">' + response.data[i].status + '</span>'))
-                            .append($('<td>').append(response.data[i].avg_price))
-                            .append($('<td>').append(
-                                '<button class="btn btn-primary btn-rounded">Edit</button>'))
-                            .append($('<td>').append(
-                                '<button class="btn btn-danger btn-rounded">Delete</button>'))
-                        )
-                    }
-                }
-            });
+            sendRequestAndRest();
 
             // catch event 
             $("#csv").change(function(event) {
@@ -89,6 +93,46 @@
 
                 });
             })
+
+            $("#select-type").on("change", function() {
+                let type = $("#select-type option:selected").val();
+                let status = $("#select-status option:selected").val();
+                $("#table-index > tr").remove();
+                sendRequestAndRest(type, status);
+            });
+            $("#select-status").on("change", function() {
+                let type = $("#select-type option:selected").val();
+                let status = $("#select-status option:selected").val();
+                $("#table-index > tr").remove();
+                sendRequestAndRest(type, status);
+            });
         });
+
+        function sendRequestAndRest(type, status) {
+            $.ajax({
+                type: "get",
+                url: '{{ route('admin.pitches.index', $pitchAreaId) }}',
+                data: {
+                    type,
+                    status
+                },
+                dataType: "json",
+                success: function(response) {
+                    for (var i = 0; i < response.data.length; i++) {
+                        $('#table-index').append($('<tr>')
+                            .append($('<td>').append(response.data[i].name))
+                            .append($('<td>').append(response.data[i].type))
+                            .append($('<td>').append('<span class="badge badge-success-lighten">' +
+                                response.data[i].status + '</span>'))
+                            .append($('<td>').append(response.data[i].avg_price))
+                            .append($('<td>').append(
+                                '<button class="btn btn-primary">Edit</button>'))
+                            .append($('<td>').append(
+                                '<button class="btn btn-danger">Delete</button>'))
+                        )
+                    }
+                }
+            });
+        }
     </script>
 @endpush

@@ -38,7 +38,7 @@ class PitchAreaController extends Controller
 
     public function index()
     {
-        $arrPitchArea = $this->model->get();
+        $arrPitchArea = $this->model->paginate(1);
         $arrImage = [];
         $arrOwner = [];
 
@@ -130,11 +130,16 @@ class PitchAreaController extends Controller
             return redirect()->route('admin.pitchareas.index');
         }
 
+        $arrStatus = getCacheStatusPitch();
+        $arrType = getCacheTypePitch();
+
         $title = 'Pitchareas - ' . $pitchArea;
 
         return view('admin.pitch.show', [
             'title' => $title,
             'pitchAreaId' => $pitchAreaId,
+            'arrStatus' => $arrStatus,
+            'arrType' => $arrType,
         ]);
     }
 
