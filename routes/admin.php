@@ -34,7 +34,8 @@ Route::group([
     Route::get('/create', [PitchAreaController::class, 'create'])->name('create');
     Route::post('/store', [PitchAreaController::class, 'store'])->name('store');
     Route::get('/show/pitch/{pitcharea}', [PitchAreaController::class, 'showPitch'])->name('show.pitch');
-    Route::post('/import-csv/{pitcharea}', [PitchAreaController::class, 'importCSV'])->name('import_csv');
+    Route::post('/import-csv/pitches/{pitcharea}', [PitchAreaController::class, 'importCSVPitch'])->name('import_csv.pitches');
+    Route::post('/import-csv/times/{pitcharea}', [PitchAreaController::class, 'importCSVTime'])->name('import_csv.times');
 });
 
 Route::group([
@@ -44,4 +45,6 @@ Route::group([
     Route::get('/{pitcharea}', [PitchController::class, 'index'])->name('index');
     Route::get('/create/{pitcharea}', [PitchController::class, 'create'])->name('create');
     Route::get('/edit/price/{pitcharea}', [PitchController::class, 'editPrice'])->name('edit.price');
+    Route::get('/api/timeslot/cost/{pitcharea}', [PitchController::class, 'apiGetTimeSlotAndCost'])->name('api.timeslot.cost');
+    Route::put('/update/timeslot/cost/{pitcharea}', [PitchController::class, 'updateTimeSlotAndCost'])->name('update.timeslot.cost');
 });

@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 
-use App\Models\Time;
 use App\Models\Pitch;
 use App\Enums\StatusPitchEnum;
 use Maatwebsite\Excel\Concerns\ToArray;
@@ -25,26 +24,13 @@ class PitchImport implements ToArray, WithHeadingRow
     {
         foreach ($array as $each) {
             try {
-                $arrName = explode(',', $each['ten_san']);
-                foreach ($arrName as $name) {
-                    $type = $each['the_loai'];
-                    $status = StatusPitchEnum::ACTIVE;
-
-                    $pitch = Pitch::firstOrCreate([
-                        'pitch_area_id' => $this->pitchAreaId,
-                        'name' => $name,
-                    ], [
-                        'type' => $type,
-                        'status' => $status,
-                    ]);
-
-                    Time::create([
-                        'pitch_id' => $pitch->id,
-                        'timeslot' => $each['gio'],
-                        'cost' => $each['gia'],
-                        'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
-                    ]);
-                }
+                $pitch = Pitch::firstOrCreate([
+                    'pitch_area_id' => $this->pitchAreaId,
+                    'name' => $each['ten_san'],
+                ], [
+                    'type' => $each['loai'],
+                    'status' => StatusPitchEnum::ACTIVE,
+                ]);
             } catch (\Throwable $e) {
                 dd($e);
             }

@@ -6,10 +6,17 @@
                 Create
             </a>
             <label for="csv" class="btn btn-success mb-0">
-                Import CSV
-            </label><input type="file" name="csv" id="csv" class="d-none"
+                Import Pitch CSV
+            </label>
+            <input type="file" name="csv" id="csv" class="d-none"
                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
-            <a href="{{ route('admin.pitches.edit.price', $pitchAreaId) }}" class="btn btn-warning" style="float: right">Edit Price</a>
+            <label for="csvTime" class="btn btn-outline-success mb-0">
+                Import Time CSV
+            </label>
+            <input type="file" name="csvTime" id="csvTime" class="d-none"
+                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+            <a href="{{ route('admin.pitches.edit.price', $pitchAreaId) }}" class="btn btn-warning"
+                style="float: right">Edit Price</a>
         </div>
         <div class="card-body">
             <div class="row mb-2">
@@ -62,7 +69,44 @@
                 formData.append('file', $(this)[0].files[0]);
                 $.ajax({
                     type: 'POST',
-                    url: '{{ route('admin.pitchareas.import_csv', $pitchAreaId) }}',
+                    url: '{{ route('admin.pitchareas.import_csv.pitches', $pitchAreaId) }}',
+                    dataType: 'json',
+                    enctype: 'multipart/form-data',
+                    data: formData,
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        $.toast({
+                            heading: 'Import Success',
+                            text: 'Your data have been imported sucessfully.',
+                            showHideTransition: 'slide',
+                            position: 'top-right',
+                            icon: 'success'
+                        });
+                    },
+                    error: function(response) {
+                        if (response.status == 500) {
+                            $.toast({
+                                heading: 'Import Failed',
+                                text: 'Your file is invalid .',
+                                showHideTransition: 'slide',
+                                position: 'top-right',
+                                icon: 'error'
+                            });
+                        }
+                    }
+
+                });
+            })
+
+                $("#csvTime").change(function(event) {
+                var formData = new FormData();
+                formData.append('file', $(this)[0].files[0]);
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('admin.pitchareas.import_csv.times', $pitchAreaId) }}',
                     dataType: 'json',
                     enctype: 'multipart/form-data',
                     data: formData,

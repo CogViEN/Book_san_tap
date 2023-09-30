@@ -86,6 +86,9 @@ class UserController extends Controller
     public function store(StoreRequest $request)
     {
         try {
+
+            dd($request->validated());
+
             $arr = $request->validated();
 
             if ($request->hasFile('avatar')) {
