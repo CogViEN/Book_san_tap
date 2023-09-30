@@ -6,6 +6,7 @@ use Throwable;
 use App\Models\User;
 use App\Models\Image;
 use App\Models\PitchArea;
+use App\Imports\TimeImport;
 use App\Imports\PitchImport;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -143,10 +144,20 @@ class PitchAreaController extends Controller
         ]);
     }
 
-    public function importCSV(Request $request, $pitchAreaId): JsonResponse
+    public function importCSVPitch(Request $request, $pitchAreaId): JsonResponse
     {
         try {
             Excel::import(new PitchImport($pitchAreaId), $request->file('file'));
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->errorResponse();
+        }
+    }
+
+    public function importCSVTime(Request $request, $pitchAreaId): JsonResponse
+    {
+        try {
+            Excel::import(new TimeImport($pitchAreaId), $request->file('file'));
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->errorResponse();
