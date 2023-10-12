@@ -7,11 +7,13 @@ use App\Models\Time;
 use NumberFormatter;
 use App\Models\Pitch;
 use App\Models\PitchArea;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Enums\StatusPitchEnum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Pitch\StoreRequest;
 use App\Http\Controllers\Trait\ResponseTrait;
 
 class PitchController extends Controller
@@ -52,6 +54,7 @@ class PitchController extends Controller
                     Time::query()
                         ->where('pitch_area_id', $pitchAreaId)
                         ->where('type', $each->type)
+                        ->whereNull('deleted_at')
                         ->avg('cost')
                 );
             }
@@ -63,10 +66,13 @@ class PitchController extends Controller
             foreach ($pitches as $pitch) {
                 $element['name'] = $pitch->name;
                 $element['type'] = 'For ' . $pitch->type . ' human';
+                if ($pitch->type == 6) {
+                    $element['type'] = 'Fusal';
+                }
                 $element['status'] = StatusPitchEnum::getKeyByValue($pitch->status);
 
                 $element['avg_price'] = $arrAvgCostType[$pitch->type];
-                
+
 
                 $key = "VND";
                 $locale = "vi_VN";
@@ -84,8 +90,25 @@ class PitchController extends Controller
         }
     }
 
-    public function create($pitchAreaId)
+    public function store(StoreRequest $request, $pitchAreaId)
     {
+        Pitch::firstOrCreate([
+            'pitch_area_id' => $pitchAreaId,
+            'name' => $request->get('pitch-name'),
+            'type' => $request->get('type'),
+        ], [
+            'status' => StatusPitchEnum::ACTIVE,
+        ]);
+        return $this->successResponse();
+    }
+
+    public function destroy(Request $request, $pitchAreaId)
+    {
+        Pitch::where([
+            'pitch_area_id' => $pitchAreaId,
+            'name' => $request->name,
+        ])->delete();
+        return $this->successResponse();
     }
 
     public function editPrice($pitchAreaId)
@@ -110,27 +133,69 @@ class PitchController extends Controller
 
     public function apiGetTimeSlotAndCost(Request $request, $pitchAreaId): JsonResponse
     {
-        $pitch = Pitch::select('id')
+        $res = Time::query()
             ->where('pitch_area_id', $pitchAreaId)
             ->where('type', $request->get('currentType'))
-            ->with(['time' => function ($query) {
-                $query->select('pitch_id', 'timeslot', 'cost');
-            }])
-            ->first();
-        return $this->successResponse($pitch);
+            ->whereNull('deleted_at')
+            ->orderBy('timeslot', 'ASC')
+            ->get();
+        return $this->successResponse($res);
     }
 
     public function updateTimeSlotAndCost(Request $request, $pitchAreaId)
     {
-        $currentTpe = $request->get('currentType');
-        $arrTimeSlots = $request->get('addTimeslots');
-        $arrCosts = $request->get('addCosts');
+        $check = PitchArea::where('id', $pitchAreaId)->first();
+        if (is_null($check)) {
+            return $this->errorResponse('Cdmmm sửa cái lonnnzzzz');
+        }
 
-        $pitches = Pitch::select('id')
-            ->where('pitch_area_id', $pitchAreaId)
-            ->where('type', $currentTpe)
-            ->get();
-        foreach ($pitches as $pitch) {
+        try {
+            $currentType = $request->get('currentType');
+            $arrTimeSlots = $request->get('addTimeslots');
+            $arrCosts = $request->get('addCosts');
+
+            $lengthTimeSlot = count($arrTimeSlots);
+            for ($i = 0; $i < $lengthTimeSlot; $i++) {
+                $timeslot =  implode("", array_values($arrTimeSlots[$i]));
+                $cost = implode("", array_values($arrCosts[$i]));
+
+                $time = Time::query()
+                    ->where('pitch_area_id', $pitchAreaId)
+                    ->where('type', $currentType)
+                    ->where('timeslot', $timeslot)
+                    ->whereNull('deleted_at')
+                    ->first();
+                if (is_null($time)) {
+                    Time::create([
+                        'pitch_area_id' => $pitchAreaId,
+                        'type' => $currentType,
+                        'timeslot' => $timeslot,
+                        'cost' => $cost,
+                        'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                    ]);
+                } else {
+
+                    if ($time->cost != $cost) {
+                        Time::where('pitch_area_id', $pitchAreaId)
+                            ->where('type', $currentType)
+                            ->where('timeslot', $timeslot)
+                            ->whereNull('deleted_at')
+                            ->update(['deleted_at' => \Carbon\Carbon::now()->toDateTimeString()]);
+
+                        Time::create([
+                            'pitch_area_id' => $pitchAreaId,
+                            'type' => $currentType,
+                            'timeslot' => $timeslot,
+                            'cost' => $cost,
+                            'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                        ]);
+                    }
+                }
+            }
+            return $this->successResponse();
+        } catch (\Throwable $e) {
+            dd($e);
+            return $this->errorResponse();
         }
     }
 }
