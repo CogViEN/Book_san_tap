@@ -43,7 +43,8 @@ Route::group([
     'prefix' => 'pitches',
 ], function () {
     Route::get('/{pitcharea}', [PitchController::class, 'index'])->name('index');
-    Route::get('/create/{pitcharea}', [PitchController::class, 'create'])->name('create');
+    Route::get('/destroy/{pitcharea}', [PitchController::class, 'destroy'])->name('destroy');
+    Route::post('/store/{pitcharea}', [PitchController::class, 'store'])->name('store');
     Route::get('/edit/price/{pitcharea}', [PitchController::class, 'editPrice'])->name('edit.price');
     Route::get('/api/timeslot/cost/{pitcharea}', [PitchController::class, 'apiGetTimeSlotAndCost'])->name('api.timeslot.cost');
     Route::put('/update/timeslot/cost/{pitcharea}', [PitchController::class, 'updateTimeSlotAndCost'])->name('update.timeslot.cost');

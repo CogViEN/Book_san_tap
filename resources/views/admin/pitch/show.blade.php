@@ -2,9 +2,9 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <a href="{{ route('admin.pitches.create', $pitchAreaId) }}" class="btn btn-primary">
-                Create
-            </a>
+            <button type="button" onclick="addPitch()" class="btn btn-outline-primary">
+                Add Pitch
+            </button>
             <label for="csv" class="btn btn-success mb-0">
                 Import Pitch CSV
             </label>
@@ -18,6 +18,44 @@
             <a href="{{ route('admin.pitches.edit.price', $pitchAreaId) }}" class="btn btn-warning"
                 style="float: right">Edit Price</a>
         </div>
+        {{-- Modal Pitch --}}
+        <div id="modal-pitch" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header modal-colored-header bg-info">
+                        <h4 class="modal-title" id="info-header-modalLabel">Create </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('admin.pitches.store', $pitchAreaId) }}" method="post"
+                            id="form-create-pitch">
+                            @csrf
+                            <div class="form-group">
+                                <label for="pitch-name">Number Pitch</label>
+                                <input class="form-control" id="name-pitch" type="text" name="pitch-name" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="form-control select-type" name="type" id="select-type-pitch">
+                                    @foreach ($arrType as $key => $type)
+                                        <option value="{{ $type }}">{{ $key }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+                        <button onclick="submitForm('pitch')" class="btn btn-info">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- End Modal --}}
+        {{-- Modal Type --}}
+        
+        {{-- ENd Modal --}}
         <div class="card-body">
             <div class="row mb-2">
                 <div class="col">
@@ -47,11 +85,13 @@
                             <th>Type</th>
                             <th>Status</th>
                             <th>Medium Price</th>
-                            <th>Edit</th>
+                            <th>Edit Type/Status</th>
                             <th>Delete</th>
                         </tr>
                     </thead>
+                    <tbody>
 
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -101,7 +141,7 @@
                 });
             })
 
-                $("#csvTime").change(function(event) {
+            $("#csvTime").change(function(event) {
                 var formData = new FormData();
                 formData.append('file', $(this)[0].files[0]);
                 $.ajax({
@@ -141,14 +181,22 @@
             $("#select-type").on("change", function() {
                 let type = $("#select-type option:selected").val();
                 let status = $("#select-status option:selected").val();
-                $("#table-index > tr").remove();
+                $("#table-index > tbody > tr").remove();
                 sendRequestAndRest(type, status);
             });
             $("#select-status").on("change", function() {
                 let type = $("#select-type option:selected").val();
                 let status = $("#select-status option:selected").val();
-                $("#table-index > tr").remove();
+                $("#table-index > tbody > tr").remove();
                 sendRequestAndRest(type, status);
+            });
+            $(document).on('click', '.btn-delete', function() {
+                deletePitch($(this).attr('data'));
+                notifySuccess("Deleted Pitch successfully!");
+                $(this).closest("tr").remove();
+            });
+            $(document).on('click', '.btn-edit', function() {
+                console.log(1);
             });
         });
 
@@ -170,13 +218,90 @@
                                 response.data[i].status + '</span>'))
                             .append($('<td>').append(response.data[i].avg_price))
                             .append($('<td>').append(
-                                '<button class="btn btn-primary">Edit</button>'))
+                                '<button class="btn-edit btn btn-primary">Edit</button>'))
                             .append($('<td>').append(
-                                '<button class="btn btn-danger">Delete</button>'))
+                                '<button type="button" data="' + response.data[i].name +
+                                '" class="btn-delete btn btn-danger">Delete</button>'))
                         )
                     }
                 }
             });
+        }
+
+        function submitForm(type) {
+            const obj = $("#form-create-" + type);
+            var formData = new FormData(obj[0]);
+            $.ajax({
+                url: obj.attr('action'),
+                type: 'POST',
+                dataType: "json",
+                data: formData,
+                processData: false,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                success: function(response) {
+                    if (response.success) {
+                        $("#modal-pitch").modal("hide");
+                        notifySuccess("Add Pitch successfully")
+                        $("#table-index > tbody > tr").remove();
+                        sendRequestAndRest();
+                    } else {
+                        showError(response.message);
+                    }
+
+                },
+                error: function(response) {
+                    let errors;
+                    if (response.responseJSON.errors) {
+                        errors = Object.values(response.responseJSON.errors);
+                        showError(errors);
+                    } else {
+                        errors = response.responseJSON.message;
+                        showError(errors);
+                    }
+
+                },
+            });
+        }
+
+        function addPitch() {
+            var table = document.getElementById("table-index");
+            var count = table.tBodies[0].rows.length;
+            $("#name-pitch").val("sân " + (count + 1));
+            $("#modal-pitch").modal("show");
+        }
+
+        function deletePitch(name) {
+            $.ajax({
+                type: "get",
+                url: '{{ route('admin.pitches.destroy', $pitchAreaId) }}',
+                data: {
+                    name
+                },
+                dataType: "dataType",
+                success: function(response) {
+
+                }
+            });
+        }
+
+        function showError(errors) {
+            let string = '<ul>'
+            if (Array.isArray(errors)) {
+                errors.forEach(function(each) {
+                    each.forEach(function(error) {
+                        string += `<li>${error}</li>`;
+                    });
+                });
+            } else {
+                string += `<li>${errors}</li>`;
+            }
+            string += '</ul>';
+            $("#div_errors").html(string);
+            $("#div_errors").removeClass("d-none").show();
+            notifyError(string);
         }
     </script>
 @endpush

@@ -87,8 +87,6 @@ class UserController extends Controller
     {
         try {
 
-            dd($request->validated());
-
             $arr = $request->validated();
 
             if ($request->hasFile('avatar')) {
