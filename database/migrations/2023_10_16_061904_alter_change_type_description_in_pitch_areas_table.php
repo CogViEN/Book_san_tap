@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        if (Schema::hasColumn('users', 'email')) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->string('email')->unique()->change();
+        if (Schema::hasColumn('pitch_areas', 'description')) {
+            Schema::table('pitch_areas', function (Blueprint $table) {
+                $table->text('description')->change();
             });
         }
     }
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('pitch_areas', function (Blueprint $table) {
             //
         });
     }

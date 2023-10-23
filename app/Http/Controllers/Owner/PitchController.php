@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Owner;
 
-use Throwable;
 use App\Models\Time;
 use NumberFormatter;
 use App\Models\Pitch;
@@ -15,7 +14,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Pitch\StoreRequest;
 use App\Http\Controllers\Trait\TitleTrait;
 use App\Http\Controllers\Trait\ResponseTrait;
-use Illuminate\Support\Facades\Route;
 
 class PitchController extends Controller
 {
@@ -24,6 +22,9 @@ class PitchController extends Controller
 
     public function index($pitchAreaId, Request $request): JsonResponse
     {
+        if (!checkPitchAreaBelongThisUser(auth()->user()->id, $pitchAreaId)) {
+            return redirect()->route('owner.pitchareas.index');
+        }
         try {
             // query eloquent
             $query = Pitch::query()
@@ -115,6 +116,10 @@ class PitchController extends Controller
 
     public function editPrice($pitchAreaId)
     {
+        if (!checkPitchAreaBelongThisUser(auth()->user()->id, $pitchAreaId)) {
+            return redirect()->route('owner.pitchareas.index');
+        }
+
         $pitchArea = PitchArea::where('id', $pitchAreaId)
             ->value('name');
 
@@ -126,7 +131,7 @@ class PitchController extends Controller
 
         $title = 'Pitchareas - ' . $pitchArea . ' - ' . 'Edit Price';
 
-        return view('admin.pitch.editPrice', [
+        return view('owner.pitch.editPrice', [
             'title' => $title,
             'types' => $types,
             'pitchAreaId' => $pitchAreaId,
@@ -135,6 +140,10 @@ class PitchController extends Controller
 
     public function apiGetTimeSlotAndCost(Request $request, $pitchAreaId): JsonResponse
     {
+        if (!checkPitchAreaBelongThisUser(auth()->user()->id, $pitchAreaId)) {
+            return redirect()->route('owner.pitchareas.index');
+        }
+
         $res = Time::query()
             ->where('pitch_area_id', $pitchAreaId)
             ->where('type', $request->get('currentType'))
@@ -201,5 +210,16 @@ class PitchController extends Controller
         }
     }
 
-   
+    public function getPitch($pitchAreaId): JsonResponse
+    {
+        if (!checkPitchAreaBelongThisUser(auth()->user()->id, $pitchAreaId)) {
+            return $this->errorResponse('Dô cc à thằng ngu');
+        }
+
+        $pitches = Pitch::select('id', 'name', 'type')
+                        ->where('pitch_area_id', $pitchAreaId)
+                        ->get();
+        
+        return $this->successResponse($pitches);
+    }
 }

@@ -26,25 +26,32 @@
                                 <li class="side-nav-title side-nav-item">Service</li>
                                
                                 <li class="side-nav-item">
-                                    @can('index',App\User::class)
-                                    <a href="{{ route('admin.users.index') }}" class="side-nav-link">
-                                        <i class="uil-home-alt"></i>
-                                        <span class="badge badge-success float-right">4</span>
-                                        <span> Users </span>
-                                    </a>
-                                    @endcan
-                                    <a href="{{ route('admin.pitchareas.index') }}" class="side-nav-link">
-                                        <i class="uil-home-alt"></i>
+                                    <a href="{{ route('owner.pitchareas.index') }}" class="side-nav-link">
+                                        <i class="uil-football"></i>
                                         <span class="badge badge-success float-right">4</span>
                                         <span> Pitch Areas </span>
                                     </a>
-                                    <a href="{{ route('admin.posts.index') }}" class="side-nav-link">
-                                        <i class="uil-home-alt"></i>
+                                    <a href="#" class="side-nav-link">
+                                        <i class="uil-postcard"></i>
                                         <span class="badge badge-success float-right">4</span>
                                         <span> Posts </span>
                                     </a>
                                 </li>
-
+                                <li class="side-nav-item">
+                                    <a href="javascript: void(0);" class="side-nav-link" aria-expanded="false">
+                                        <i class="uil-suitcase"></i>
+                                        <span> Appointments </span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul class="side-nav-second-level mm-collapse" aria-expanded="false" style="height: 0px;">
+                                        <li>
+                                            <a href="{{ route('owner.appointments.index') }}">Manage</a>
+                                        </li>
+                                        <li>
+                                            <a href="apps-ecommerce-products-details.html">View</a>
+                                        </li>
+                                    </ul>
+                                </li>
 
                                 <div class="clearfix"></div>
 

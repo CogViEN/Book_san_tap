@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        
-        Schema::table('times', function (Blueprint $table) {
-            if (Schema::hasColumn('times', 'pitch_area_id')) {
-                $table->unsignedBigInteger('pitch_area_id')->change();
-            }
-            $table->foreign('pitch_area_id')->references('id')->on('pitch_areas');
-        });
+       
+            Schema::table('pitch_times', function (Blueprint $table) {
+                $table->date('will_do')->change();
+            });
     }
 
     /**
@@ -29,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('times', function (Blueprint $table) {
+        Schema::table('pitch_times', function (Blueprint $table) {
             //
         });
     }

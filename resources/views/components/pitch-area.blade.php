@@ -19,9 +19,10 @@
                     </p>
                     <p class="card-text">
                         <small class="text-muted">
-                            <a href="#" class="btn btn-info btn-sm">Edit Info</a>
-                            <a href="{{ route('admin.pitchareas.show.pitch', $pitchArea) }}"
-                                class="btn btn-secondary btn-sm">
+                            <a href="{{ $routeEditInfo }}" class="btn btn-info btn-sm">
+                                Edit Info
+                            </a>
+                            <a href="{{ $routeViewDetail }}" class="btn btn-secondary btn-sm">
                                 View Detail
                             </a>
                             <a href="" class="btn btn-danger btn-sm float-right">Delete</a>

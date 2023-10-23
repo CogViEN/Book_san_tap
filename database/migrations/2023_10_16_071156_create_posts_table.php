@@ -13,11 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        if (Schema::hasColumn('users', 'phone')) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->string('phone')->unique()->change();
-            });
-        }
+        Schema::create('posts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained();
+            $table->string('heading');
+            $table->text('description');
+            $table->integer('status');
+            $table->timestamp('created_at');
+        });
     }
 
     /**
@@ -27,8 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('posts');
     }
 };

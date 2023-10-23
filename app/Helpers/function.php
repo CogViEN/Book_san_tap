@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PitchArea;
 use App\Enums\UserRoleEnum;
 use App\Enums\PitchTypeEnum;
 use App\Enums\StatusPitchEnum;
@@ -49,3 +50,36 @@ if (!function_exists('isAdmin')) {
         return user() && user()->role === UserRoleEnum::ADMIN;
     }
 }
+
+if (!function_exists('isOwner')) {
+    function isOwner(): bool
+    {
+        return user() && user()->role === UserRoleEnum::OWNER;
+    }
+}
+
+if (!function_exists('checkPitchAreaBelongThisUser')) {
+    function checkPitchAreaBelongThisUser($user_id, $pitch_area_id): bool
+    {
+        $checkExists = PitchArea::query()
+            ->where('id', $pitch_area_id)
+            ->where('user_id', $user_id)
+            ->exists();
+
+        return $checkExists;
+    }
+}
+
+if (!function_exists('getNamePitchArea')) {
+    function getNamePitchArea($pitch_area_id): string
+    {
+        $res = PitchArea::where('id', $pitch_area_id)
+            ->value('name');
+        return $res ?? '';
+    }
+}
+
+
+
+
+

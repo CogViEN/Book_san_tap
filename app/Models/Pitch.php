@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Time;
-use App\Enums\StatusPitchEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Pitch extends Model
@@ -20,5 +19,9 @@ class Pitch extends Model
         'status',
     ];
 
+    public function order() : HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
     
 }

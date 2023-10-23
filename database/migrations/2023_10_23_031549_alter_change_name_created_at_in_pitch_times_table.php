@@ -13,7 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('pitch__times');
+
+        Schema::table('pitch_times', function (Blueprint $table) {
+            $table->renameColumn('created_at', 'will_do');
+        });
     }
 
     /**
@@ -23,6 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('pitch_times', function (Blueprint $table) {
+            //
+        });
     }
 };

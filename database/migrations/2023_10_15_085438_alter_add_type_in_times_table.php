@@ -13,9 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('times', function (Blueprint $table) {
-            $table->dropColumn('id');
-        });
+        if (!Schema::hasColumn('times', 'type')) {
+            Schema::table('times', function (Blueprint $table) {
+                $table->integer('type');
+            });
+        }
     }
 
     /**
@@ -25,6 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('times', function (Blueprint $table) {
+            //
+        });
     }
 };

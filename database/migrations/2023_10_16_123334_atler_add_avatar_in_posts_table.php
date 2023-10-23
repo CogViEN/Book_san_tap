@@ -13,9 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('times', function (Blueprint $table) {
-            $table->foreign('pitch_id')->references('id')->on('pitches');
-        });
+        if (!Schema::hasColumn('posts', 'avatar')) {
+            Schema::table('posts', function (Blueprint $table) {
+                $table->string('avatar')->after('description');
+            });
+        }
     }
 
     /**
@@ -25,7 +27,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('times', function (Blueprint $table) {
+        Schema::table('posts', function (Blueprint $table) {
             //
         });
     }

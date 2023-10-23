@@ -1,4 +1,4 @@
-@extends('layout_admin.master')
+@extends('layout_owner.master')
 @section('content')
     <div class="card">
         <div class="card-header">
@@ -15,7 +15,7 @@
             </label>
             <input type="file" name="csvTime" id="csvTime" class="d-none"
                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
-            <a href="{{ route('admin.pitches.edit.price', $pitchAreaId) }}" class="btn btn-warning"
+            <a href="{{ route('owner.pitches.edit.price', $pitchAreaId) }}" class="btn btn-warning"
                 style="float: right">Edit Price</a>
         </div>
         {{-- Modal Pitch --}}
@@ -28,7 +28,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     </div>
                     <div class="modal-body">
-                        <form action="{{ route('admin.pitches.store', $pitchAreaId) }}" method="post"
+                        <form action="{{ route('owner.pitches.store', $pitchAreaId) }}" method="post"
                             id="form-create-pitch">
                             @csrf
                             <div class="form-group">
@@ -109,7 +109,7 @@
                 formData.append('file', $(this)[0].files[0]);
                 $.ajax({
                     type: 'POST',
-                    url: '{{ route('admin.pitchareas.import_csv.pitches', $pitchAreaId) }}',
+                    url: '{{ route('owner.pitchareas.import_csv.pitches', $pitchAreaId) }}',
                     dataType: 'json',
                     enctype: 'multipart/form-data',
                     data: formData,
@@ -125,6 +125,8 @@
                             position: 'top-right',
                             icon: 'success'
                         });
+                        $("#table-index > tbody > tr").remove();
+                        sendRequestAndRest();
                     },
                     error: function(response) {
                         if (response.status == 500) {
@@ -146,7 +148,7 @@
                 formData.append('file', $(this)[0].files[0]);
                 $.ajax({
                     type: 'POST',
-                    url: '{{ route('admin.pitchareas.import_csv.times', $pitchAreaId) }}',
+                    url: '{{ route('owner.pitchareas.import_csv.times', $pitchAreaId) }}',
                     dataType: 'json',
                     enctype: 'multipart/form-data',
                     data: formData,
@@ -162,6 +164,8 @@
                             position: 'top-right',
                             icon: 'success'
                         });
+                        $("#table-index > tbody > tr").remove();
+                        sendRequestAndRest();
                     },
                     error: function(response) {
                         if (response.status == 500) {
@@ -203,7 +207,7 @@
         function sendRequestAndRest(type, status) {
             $.ajax({
                 type: "get",
-                url: '{{ route('admin.pitches.index', $pitchAreaId) }}',
+                url: '{{ route('owner.pitches.index', $pitchAreaId) }}',
                 data: {
                     type,
                     status
@@ -277,7 +281,7 @@
         function deletePitch(name) {
             $.ajax({
                 type: "get",
-                url: '{{ route('admin.pitches.destroy', $pitchAreaId) }}',
+                url: '{{ route('owner.pitches.destroy', $pitchAreaId) }}',
                 data: {
                     name
                 },

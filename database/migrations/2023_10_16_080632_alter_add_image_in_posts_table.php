@@ -13,8 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('times');
-        
+        if (!Schema::hasColumn('posts', 'image')) {
+            Schema::table('posts', function (Blueprint $table) {
+                $table->string('image')->nullable()->after('description');
+            });
+        }
     }
 
     /**
@@ -24,6 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('posts', function (Blueprint $table) {
+            //
+        });
     }
 };

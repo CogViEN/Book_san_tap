@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Owner;
 
-use Throwable;
 use App\Models\User;
 use App\Models\Image;
 use App\Models\PitchArea;
@@ -15,9 +14,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Redirect;
 use App\Http\Controllers\Trait\TitleTrait;
 use App\Http\Controllers\Trait\ResponseTrait;
-use App\Http\Requests\PitchArea\StoreRequest;
+use App\Http\Requests\PitchArea\StoreRequestByOwner;
 
 class PitchAreaController extends Controller
 {
@@ -28,8 +28,8 @@ class PitchAreaController extends Controller
 
     public function __construct()
     {
-        $this->model = PitchArea::query();
-        $this->table = (new PitchArea())->getTable();
+        $this->model = PitchArea::query()
+            ->where('user_id', auth()->user()->id);
 
         $routerName = Route::currentRouteName();
         $title = ucfirst($this->getTitleRoute($routerName));
@@ -48,8 +48,7 @@ class PitchAreaController extends Controller
             $arrOwner[$i] = User::where('id', $arrPitchArea[$i]->user_id)->first()->info;
         }
 
-
-        return view('admin.pitch_area.index', [
+        return view('owner.pitch_area.index', [
             'arrPitchArea' => $arrPitchArea,
             'arrImage' => $arrImage,
             'arrOwner' => $arrOwner,
@@ -58,15 +57,15 @@ class PitchAreaController extends Controller
 
     public function create()
     {
-        return view('admin.pitch_area.create');
+        return view('owner.pitch_area.create');
     }
 
-    public function store(StoreRequest $request)
+    public function store(StoreRequestByOwner $request)
     {
         DB::beginTransaction();
         try {
             $arr = $request->validated();
-            
+
             $arrImageRemove = [];
             $checkImgRemoveExist = false;
             if (!is_null($request->get('imageRemove'))) {
@@ -75,7 +74,7 @@ class PitchAreaController extends Controller
             }
 
             $owner = $request->get('owner');
-            $arr['user_id'] = User::firstOrCreate(['name' => $owner])->id;
+            $arr['user_id'] = auth()->user()->id;
 
             $pitchArea = PitchArea::create($arr);
 
@@ -117,7 +116,7 @@ class PitchAreaController extends Controller
 
             DB::commit();
             return $this->successResponse();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
@@ -125,11 +124,17 @@ class PitchAreaController extends Controller
 
     public function showPitch($pitchAreaId)
     {
+        // check if pitch area is belong to this users
+        if (!checkPitchAreaBelongThisUser(auth()->user()->id, $pitchAreaId)) {
+            return redirect()->route('owner.pitchareas.index');
+        }
+
+        // check if pitch area is exists
         $pitchArea = PitchArea::where('id', $pitchAreaId)
             ->value('name');
 
         if ($pitchArea == null) {
-            return redirect()->route('admin.pitchareas.index');
+            return redirect()->route('owner.pitchareas.index');
         }
 
         $arrStatus = getCacheStatusPitch();
@@ -137,12 +142,21 @@ class PitchAreaController extends Controller
 
         $title = 'Pitchareas - ' . $pitchArea;
 
-        return view('admin.pitch.show', [
+        return view('owner.pitch.show', [
             'title' => $title,
             'pitchAreaId' => $pitchAreaId,
             'arrStatus' => $arrStatus,
             'arrType' => $arrType,
         ]);
+    }
+
+    public function getPitchArea()
+    {
+        $pitchArea = PitchArea::select('id', 'name')
+            ->where('user_id', auth()->user()->id)
+            ->get();
+
+        return $this->successResponse($pitchArea);
     }
 
     public function importCSVPitch(Request $request, $pitchAreaId): JsonResponse
@@ -163,12 +177,5 @@ class PitchAreaController extends Controller
         } catch (\Throwable $th) {
             return $this->errorResponse();
         }
-    }
-
-    public function editInformation($pitchAreaId)
-    {
-        return view('admin.pitch.editInfo', [
-            'pitchAreaId' => $pitchAreaId,
-        ]);
     }
 }

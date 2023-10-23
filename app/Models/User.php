@@ -29,4 +29,9 @@ AuthenticatableContract
         'remember_token',
     ];
 
+    public function getInfoAttribute()
+    {
+        return $this->name . ' - ' . $this->phone;
+    }
+
 }

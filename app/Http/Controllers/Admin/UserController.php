@@ -8,6 +8,7 @@ use App\Enums\UserRoleEnum;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,7 @@ use App\Http\Requests\User\StoreRequest;
 use App\Http\Controllers\Trait\TitleTrait;
 use App\Http\Controllers\Trait\ResponseTrait;
 use App\Http\Requests\User\StoreOwnerRequest;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -35,6 +37,9 @@ class UserController extends Controller
 
     public function index()
     {
+        // check authorization super admin
+        $this->authorize('index', User::class);
+
         $arrRole = UserRoleEnum::getArrayView();
         array_shift($arrRole); // remove super admin role
 
@@ -45,6 +50,9 @@ class UserController extends Controller
 
     public function api()
     {
+        // check authorization super admin
+        $this->authorize('index', User::class);
+
         return Datatables::of($this->model)
             ->editColumn('role', function ($object) {
                 return UserRoleEnum::getKeyByValue($object->role);
@@ -65,6 +73,9 @@ class UserController extends Controller
 
     public function apiName(Request $request)
     {
+        // check authorization super admin
+        $this->authorize('index', User::class);
+
         return $this->model
             ->where('name', 'like', '%' . $request->get('q') . '%')
             ->get([
@@ -75,6 +86,9 @@ class UserController extends Controller
 
     public function create()
     {
+        // check authorization super admin
+        $this->authorize('index', User::class);
+
         $arrRole = UserRoleEnum::getArrayView();
         array_shift($arrRole); // remove super admin role
 
@@ -85,6 +99,9 @@ class UserController extends Controller
 
     public function store(StoreRequest $request)
     {
+        // check authorization super admin
+        $this->authorize('index', User::class);
+
         try {
 
             $arr = $request->validated();
@@ -113,6 +130,9 @@ class UserController extends Controller
 
     public function destroy($userId)
     {
+         // check authorization super admin
+         $this->authorize('index', User::class);
+
         $userPhone = User::find($userId)->phone;
 
         $this->model->find($userId)->delete();
@@ -121,6 +141,9 @@ class UserController extends Controller
 
     public function getOwner(Request $request)
     {
+        // check authorization super admin and admin
+        $this->authorize('index2', User::class);
+
         $data = $this->model
             ->where([
                 ['name', 'like', '%' . $request->get('q') . '%'],
@@ -133,6 +156,10 @@ class UserController extends Controller
 
     public function checkOwner($ownerName)
     {
+        // check authorization super admin and admin
+        $this->authorize('index2', User::class);
+
+
         $check = $this->model
             ->where([
                 ['name', '=', $ownerName],
@@ -144,9 +171,12 @@ class UserController extends Controller
 
     public function storeOwner(StoreOwnerRequest $request)
     {
+        // check authorization super admin and admin
+        $this->authorize('index2', User::class);
+
         try {
             $arr = $request->validated();
-            $arr['password'] = '1'; // default when creating by admin or super admin
+            $arr['password'] = Hash::make('1'); // default when creating by admin or super admin
             $arr['role'] = UserRoleEnum::OWNER;
             User::create($arr);
 

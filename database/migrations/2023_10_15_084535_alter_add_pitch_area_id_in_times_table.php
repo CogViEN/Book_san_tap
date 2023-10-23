@@ -13,13 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pitches', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pitch_area_id')->constrained();
-            $table->integer('name');
-            $table->integer('type');
-            $table->boolean('status')->default(false);
-        });
+        if (!Schema::hasColumn('times', 'pitch_area_id')) {
+            Schema::table('times', function (Blueprint $table) {
+                $table->unsignedBigInteger('pitch_area_id');
+                $table->foreign('pitch_area_id')->references('id')->on('pitch_areas');
+            });
+        }
     }
 
     /**
@@ -29,6 +28,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pitches');
+        Schema::table('times', function (Blueprint $table) {
+            //
+        });
     }
 };

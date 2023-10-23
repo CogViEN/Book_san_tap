@@ -7,11 +7,11 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class AdminMiddleware
+class OwnerMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!isAdmin() && !isSuperAdmin()) {
+        if (!isOwner()) {
             return redirect()->route('login');
         }
 

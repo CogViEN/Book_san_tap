@@ -13,7 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('pitches');
+        if (Schema::hasColumn('times', 'timeslot')) {
+            Schema::table('times', function (Blueprint $table) {
+                $table->dropPrimary('timeslot');
+            });
+        }
     }
 
     /**
@@ -23,6 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('times', function (Blueprint $table) {
+            //
+        });
     }
 };

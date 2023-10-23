@@ -51,12 +51,11 @@ class AuthController extends Controller
 
 
             auth()->login($user, true);
-
             $role = strtolower(UserRoleEnum::getKeyByValue(auth()->user()->role));
+            if($role == 'super admin') $role = 'admin';
 
             return $this->successResponse($role);
         } catch (\Throwable $e) {
-            dd($e);
             return $this->errorResponse('the email or password is incorrect');
         }
     }
