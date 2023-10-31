@@ -36,23 +36,12 @@
                                         <span class="badge badge-success float-right">4</span>
                                         <span> Posts </span>
                                     </a>
-                                </li>
-                                <li class="side-nav-item">
-                                    <a href="javascript: void(0);" class="side-nav-link" aria-expanded="false">
+                                    <a href="{{ route('owner.appointments.index') }}" class="side-nav-link">
                                         <i class="uil-suitcase"></i>
+                                        <span class="badge badge-success float-right">4</span>
                                         <span> Appointments </span>
-                                        <span class="menu-arrow"></span>
                                     </a>
-                                    <ul class="side-nav-second-level mm-collapse" aria-expanded="false" style="height: 0px;">
-                                        <li>
-                                            <a href="{{ route('owner.appointments.index') }}">Manage</a>
-                                        </li>
-                                        <li>
-                                            <a href="apps-ecommerce-products-details.html">View</a>
-                                        </li>
-                                    </ul>
                                 </li>
-
                                 <div class="clearfix"></div>
 
                         </div>

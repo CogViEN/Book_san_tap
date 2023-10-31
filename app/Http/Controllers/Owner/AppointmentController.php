@@ -238,4 +238,5 @@ class AppointmentController extends Controller
         
         return $this->successResponse($times);
     }
+
 }

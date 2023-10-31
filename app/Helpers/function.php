@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Time;
 use App\Models\PitchArea;
 use App\Enums\UserRoleEnum;
 use App\Enums\PitchTypeEnum;
@@ -79,7 +80,16 @@ if (!function_exists('getNamePitchArea')) {
     }
 }
 
+if (!function_exists('getCacheTimeSlots')) {
+    function getCacheTimeSlots()
+    {
+        return cache()->remember('cacheTimeslots', 24 * 60 * 60, function () {
+            $timeslots = Time::select('timeslot')
+                ->where('pitch_area_id', 1)
+                ->where('type', 5)
+                ->pluck('timeslot');
 
-
-
-
+            return $timeslots;
+        });
+    }
+}

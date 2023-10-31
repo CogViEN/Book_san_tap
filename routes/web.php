@@ -3,11 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\EndUser\HomepageController;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+// Route::get('/', [HomepageController::class, 'index'])->name('index');
 
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
