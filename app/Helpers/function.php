@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Time;
+use App\Models\Pitch;
 use App\Models\PitchArea;
 use App\Enums\UserRoleEnum;
 use App\Enums\PitchTypeEnum;
@@ -91,5 +92,31 @@ if (!function_exists('getCacheTimeSlots')) {
 
             return $timeslots;
         });
+    }
+}
+
+if (!function_exists('getTypesThisPitch')) {
+    function getTypesThisPitch($pitchareaId)
+    {
+        $types = Pitch::select('type')
+            ->where('pitch_area_id', $pitchareaId)
+            ->where('status', StatusPitchEnum::ACTIVE)
+            ->distinct()
+            ->get();
+
+        $res = [];
+
+        foreach ($types as $each) {
+            $res[$each->type] = PitchTypeEnum::getKeyByValue($each->type);
+        }
+
+        return $res;
+    }
+}
+
+if (!function_exists('getNumberTimeSlot')) {
+    function getNumberTimeSlot($now)
+    {
+        return 19 - ($now + 1) + 5;
     }
 }

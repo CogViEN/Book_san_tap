@@ -16,4 +16,10 @@ class Image extends Model
         'path',
         'type',
     ];
+
+    public function scopeGetImages($query,$id)
+    {
+        return $query->where('object-id', $id)
+                        ->where('type', 1);
+    }
 }

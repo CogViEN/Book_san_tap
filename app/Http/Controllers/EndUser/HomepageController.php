@@ -7,8 +7,10 @@ use NumberFormatter;
 use App\Models\Image;
 use App\Models\Pitch;
 use App\Models\PitchArea;
+use App\Models\PitchTime;
 use App\Enums\PitchTypeEnum;
 use Illuminate\Http\Request;
+use App\Enums\StatusPitchEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Trait\ResponseTrait;
 
@@ -50,15 +52,15 @@ class HomepageController extends Controller
         $curTypes = [];
         if ($request->has('types')) {
             $curTypes = $request->get('types');
-           $pitchareas->whereHas('pitch', function ($q) use ($curTypes) {
+            $pitchareas->whereHas('pitch', function ($q) use ($curTypes) {
                 return $q->whereIn('type', $curTypes);
-           });
+            });
         }
 
         // get the result after process request
         $pitchareas = $pitchareas->get();
 
-         
+
 
         // format data for output
         foreach ($pitchareas as $pitcharea) {
@@ -127,10 +129,10 @@ class HomepageController extends Controller
 
         // process request type
         if ($request->has('types')) {
-           $curTypes = $request->get('types');
-           $pitchareas->whereHas('pitch', function ($q) use ($curTypes) {
+            $curTypes = $request->get('types');
+            $pitchareas->whereHas('pitch', function ($q) use ($curTypes) {
                 return $q->whereIn('type', $curTypes);
-           });
+            });
         }
 
         // get the result after process request
@@ -181,5 +183,66 @@ class HomepageController extends Controller
             ->get();
 
         return $this->successResponse($objects);
+    }
+
+    public function getPitch($id)
+    {
+        $objects = Pitch::select('id', 'type', 'name')
+            ->where('pitch_area_id', $id)
+            ->where('status', StatusPitchEnum::ACTIVE)
+            ->get();
+
+        return $this->successResponse($objects);
+    }
+
+    public function detail($id)
+    {
+        $pitcharea = PitchArea::select('id', 'user_id', 'name', 'address', 'description')
+            ->detailOwner($id)
+            ->first();
+
+        $types = getTypesThisPitch($id);
+
+        $images = Image::select('path')
+            ->getImages($id)
+            ->get();
+
+
+        return view('frontpage.show', [
+            'pitcharea' => $pitcharea,
+            'types' => $types,
+            'images' => $images,
+        ]);
+    }
+
+    public function getTimeSLots(Request $request, $pitch_area_id)
+    {
+        // set default timezone 
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+
+        $numberTimeSlots = 19;
+
+
+        // process if date chosen is today
+        if ($request->date == date('Y-m-d')) {
+            $numberTimeSlots = getNumberTimeSlot(date('H'));
+        }
+
+        // get will do and timeslot in pitch times
+        $pitch_time = PitchTime::select('timeslot')
+            ->where('pitch_id', $request->pitch)
+            ->where('will_do', $request->date)
+            ->get()
+            ->toArray();
+
+        $times = Time::select('timeslot', 'cost')
+            ->where('pitch_area_id', $pitch_area_id)
+            ->where('type', $request->type)
+            ->whereNotIn('timeslot', $pitch_time)
+            ->orderBy('timeslot', 'DESC')
+            ->limit($numberTimeSlots)
+            ->get();
+
+        return $this->successResponse($times);
     }
 }

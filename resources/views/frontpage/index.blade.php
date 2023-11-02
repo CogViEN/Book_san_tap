@@ -67,13 +67,15 @@
         }
 
         function loadCityAndDistricts() {
-            if (loadCityAndDistricts == true) return;
+            if (checkLoadCityAndDistrcit == true) return;
 
             $.ajax({
                 type: "get",
                 url: '{{ route('api.cityAndDistrict') }}',
                 dataType: "json",
                 success: function(response) {
+                    checkLoadCityAndDistrcit = true;
+
                     cityAndDistrict = new Array();
 
                     for (const element of response.data) {

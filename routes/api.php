@@ -17,3 +17,5 @@ use App\Http\Controllers\EndUser\HomepageController;
 
 Route::get('/cityAndDistrict', [HomepageController::class, 'getCityAndDistrict'])->name('cityAndDistrict');
 Route::get('/apiPitchArea', [HomepageController::class, 'apiPitchArea'])->name('apiPitchArea');
+Route::get('/getPitch/{id}', [HomepageController::class, 'getPitch'])->name('getPitch');
+Route::get('/getTimeSLots/{pitch_area}', [HomepageController::class, 'getTimeSLots'])->name('timeslots');
